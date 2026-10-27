@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cloud Inventory Management</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f3f4f6;
+            padding: 20px
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px
+        }
+        
+        input,
+        button {
+            padding: 10px;
+            margin: 5px
+        }
+        
+        button {
+            background: #176b4d;
+            color: white;
+            border: 0;
+            cursor: pointer
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px
+        }
+        
+        td,
+        th {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left
+        }
+        
+        th {
+            background: #176b4d;
+            color: white
+        }
+        
+        .low {
+            color: #d22;
+            font-weight: bold
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Inventory Management System</h1>
+        <input id="name" placeholder="Product name">
+        <input id="qty" type="number" min="0" placeholder="Quantity">
+        <input id="price" type="number" min="0" step="0.01" placeholder="Price">
+        <button onclick="add()">Add Product</button>
+        <h3 id="summary"></h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Update</th>
+                </tr>
+            </thead>
+            <tbody id="list"></tbody>
+        </table>
+    </div>
+    <script>
+        let products = [];
+
+        function add() {
+            let name = document.getElementById('name').value.trim();
+            let qty = Number(document.getElementById('qty').value);
+            let price = Number(document.getElementById('price').value);
+            if (!name || document.getElementById('qty').value === '' || document.getElementById('price').value === '' || !Number.isInteger(qty) || qty < 0 || !Number.isFinite(price) || price < 0) {
+                alert('Enter valid product details');
+                return;
+            }
+            products.push({
+                name,
+                qty,
+                price
+            });
+            document.getElementById('name').value = '';
+            document.getElementById('qty').value = '';
+            document.getElementById('price').value = '';
+            render();
+        }
+
+        function render() {
+            let list = document.getElementById('list');
+            list.replaceChildren();
+            products.forEach((p, i) => {
+                let tr = document.createElement('tr');
+                [p.name, p.qty, '₹' + p.price.toFixed(2), p.qty < 5 ? 'Low Stock' : 'Available'].forEach((v, j) => {
+                    let td = document.createElement('td');
+                    td.textContent = v;
+                    if (j === 3 && p.qty < 5) td.className = 'low';
+                    tr.appendChild(td);
+                });
+                let td = document.createElement('td');
+                ['-', '+'].forEach(op => {
+                    let b = document.createElement('button');
+                    b.textContent = op;
+                    b.onclick = () => {
+                        if (op === '+' || p.qty > 0) {
+                            p.qty += op === '+' ? 1 : -1;
+                            render();
+                        }
+                    };
+                    td.appendChild(b);
+                });
+                tr.appendChild(td);
+                list.appendChild(tr);
+            });
+            document.getElementById('summary').textContent = 'Products: ' + products.length + ' | Total units: ' + products.reduce((s, p) => s + p.qty, 0);
+        }
+    </script>
+</body>
+
+</html>
